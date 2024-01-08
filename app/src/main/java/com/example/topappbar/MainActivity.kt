@@ -14,10 +14,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDefaults
@@ -28,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,69 +63,83 @@ fun MainScreen(context: Context) {
     val snackbarHostState = remember {
         SnackbarHostState()
     }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) {data ->
-                Snackbar(
-                    containerColor = MyGreen,
-                    snackbarData = data,
-                    shape = RoundedCornerShape(20.dp),
-                    contentColor = Color.Black,
-                    modifier = Modifier
-                        .padding(bottom = 50.dp)
-                )
+    ModalNavigationDrawer(
+        drawerContent = {
+            ModalDrawerSheet {
+                DrawerHeader()
+                DrawerBody()
             }
         },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "Menu")
-                },
-                colors = TopAppBarDefaults.topAppBarColors(MyGreen),
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            Toast.makeText(context, "Menu", Toast.LENGTH_SHORT).show()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu")
-                    }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                val result = snackbarHostState.showSnackbar(
-                                    message = "Item deleted!",
-                                    actionLabel = "Undone"
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    Toast.makeText(context, "Item recovered", Toast.LENGTH_SHORT).show()
+        drawerState = drawerState
+    ) {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(snackbarHostState) {data ->
+                    Snackbar(
+                        containerColor = MyGreen,
+                        snackbarData = data,
+                        shape = RoundedCornerShape(20.dp),
+                        contentColor = Color.Black,
+                        modifier = Modifier
+                            .padding(bottom = 50.dp)
+                    )
+                }
+            },
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(text = "Menu")
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(MyGreen),
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    drawerState.open()
                                 }
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Delete")
-                    }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = "Item deleted!",
+                                        actionLabel = "Undone"
+                                    )
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        Toast.makeText(context, "Item recovered", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Delete")
+                        }
 
-                    IconButton(
-                        onClick = {
-                            Toast.makeText(context, "Share", Toast.LENGTH_SHORT).show()
+                        IconButton(
+                            onClick = {
+                                Toast.makeText(context, "Share", Toast.LENGTH_SHORT).show()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Share,
+                                contentDescription = "Share")
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Share,
-                            contentDescription = "Share")
                     }
-                }
-            )
+                )
+            }
+            ) {
+
         }
-    ) {
-
     }
 }
